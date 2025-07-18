@@ -16,7 +16,22 @@ export function renderLegacyUI (passageHtml: string, questions: Question[]): voi
   // 1. Render passage
   const passageEl = document.getElementById('passage-text')
   if (passageEl) {
-    passageEl.innerHTML = passageHtml
+    const pTags = passageHtml.match(/<p[\s>]/gi) || []
+    if (pTags.length > 1) {
+      // already good HTML with multiple paragraphs
+      passageEl.innerHTML = passageHtml
+    } else {
+      // Strip any single wrapping <p> or <br> then rebuild
+      const plain = passageHtml
+        .replace(/<\/?p[^>]*>/gi, '\n')
+        .replace(/<br\s*\/?\s*>/gi, '\n')
+      const paragraphs = plain
+        .split(/\n+/)
+        .map(p => p.trim())
+        .filter(Boolean)
+        .map(p => `<p>${p}</p>`)
+      passageEl.innerHTML = paragraphs.join('\n')
+    }
   }
 
   // 2. Render questions list

@@ -65,7 +65,7 @@
           style="display: none"
         />
 
-        <div v-if="isProcessing" class="processing-indicator">
+        <div v-if="isLoading" class="processing-indicator">
           <div class="spinner"></div>
           <span>Processing PDF...</span>
         </div>
@@ -349,9 +349,11 @@ const handleFileSelect = async (event: Event): Promise<void> => {
     alert("Please select a PDF file.");
   }
 };
+const isLoading = ref<boolean>(false);
 
 const processPDF = async (file: File): Promise<void> => {
   try {
+    isLoading.value = true;
     const extractedText = await extractTextFromPDF(file);
     // Call OpenRouter to format passage and generate questions
     const result = await generatePassageAndQuestions(extractedText);
@@ -360,9 +362,9 @@ const processPDF = async (file: File): Promise<void> => {
 
     passageText.value = result.passageHtml;
     questions.value = result.questions as any;
-
     // Inject into legacy static layout (if present)
     renderLegacyUI(passageText.value, questions.value);
+    isLoading.value = false;
   } catch (error) {
     console.error("Error processing PDF:", error);
     alert(

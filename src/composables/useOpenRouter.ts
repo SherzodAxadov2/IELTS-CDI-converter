@@ -51,7 +51,15 @@ export function useOpenRouter() {
       },
       {
         role: "user",
-        content: `You are an assistant that converts raw IELTS PDF text into structured JSON.\n\nInput (RAW TEXT):\n${rawText}\n\nReturn ONLY valid JSON matching this exact TypeScript interface:\ninterface Result {\n  passageHtml: string;            // HTML for the reading passage (use <h2>, <p>, <b>). Newlines MUST be escaped as \\n.\n  questions: {\n    id: number;\n    text: string;\n    type: \"multiple-choice\" | \"fill-blank\" | \"true-false\";\n    options?: { value: string; text: string }[];\n    correctAnswer: string;\n    explanation?: string;\n    relevantText?: string;\n  }[];\n}\n\nRules:\n1. Do NOT wrap the JSON in markdown fences or back-ticks.\n2. Escape every newline in passageHtml as \\n.\n3. Output must be compact single-line JSON starting with { and ending with }. Nothing before or after.`,
+        content: `You are an assistant that converts raw IELTS PDF text into structured JSON.\n\nInput (RAW TEXT):\n${rawText}\n\nReturn ONLY valid JSON matching this exact TypeScript interface:\ninterface Result {\n  passageHtml: string;            // HTML for the reading passage.
+  // Requirements:
+  // 1. First output the italic introductory description line in its own <p><i>...</i></p>, e.g. "You should spend about 20 minutes on Questions 1-16, which are based on Reading Passage 1 below." If such a line exists in the RAW TEXT, reuse it; otherwise synthesise the standard sentence.
+  // 2. Immediately AFTER the intro line, detect the actual passage TITLE (the next non-empty line) and wrap it in <h2 style="text-align:center"><b>...</b></h2>. Do NOT invent generic titles like "Reading Passage 1"—use the real title present in the text.
+  // 3. BUG CONTEXT: Previous outputs sometimes merged paragraphs together, producing long <p> blocks. To fix, you MUST treat every blank line in RAW TEXT as a paragraph break.
+  //    If two or more consecutive newlines appear, that definitely indicates a new paragraph. Each resulting paragraph goes in its own <p> tag. Treat ANY blank line or multiple new-line sequence as a paragraph break. Wrap each paragraph in its own <p>...</p>.
+  // 4. NEVER nest paragraphs or merge multiple paragraphs into a single <p>.
+  // 5. Escape internal newlines inside <p> nodes as \\n.
+\n  questions: {\n    id: number;\n    text: string;\n    type: \"multiple-choice\" | \"fill-blank\" | \"true-false\";\n    options?: { value: string; text: string }[];\n    correctAnswer: string;\n    explanation?: string;\n    relevantText?: string;\n  }[];\n}\n\nRules:\n1. Do NOT wrap the JSON in markdown fences or back-ticks.\n2. Escape every newline in passageHtml as \\n.\n3. Output must be compact single-line JSON starting with { and ending with }. Nothing before or after.`,
       },
     ];
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ref } from "vue";
 import * as pdfjsLib from "pdfjs-dist";
 

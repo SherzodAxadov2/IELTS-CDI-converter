@@ -10,6 +10,7 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "jsonrepair": "^3.13.0",
     "pdfjs-dist": "^4.10.38",
     "vue": "^3.4.0"
   },

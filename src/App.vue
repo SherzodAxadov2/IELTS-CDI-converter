@@ -290,12 +290,12 @@ const {
   pause: pauseTimer,
   reset: resetTimer,
 } = useTimer();
+const { isProcessing, error: pdfError, extractTextFromPDF } = usePDF();
 const {
-  isProcessing,
-  error: pdfError,
-  extractTextFromPDF
-} = usePDF();
-const { isCalling: isLLMCalling, error: llmError, generatePassageAndQuestions } = useOpenRouter();
+  isCalling: isLLMCalling,
+  error: llmError,
+  generatePassageAndQuestions,
+} = useOpenRouter();
 const {
   questions,
   answers,
@@ -355,7 +355,8 @@ const processPDF = async (file: File): Promise<void> => {
     const extractedText = await extractTextFromPDF(file);
     // Call OpenRouter to format passage and generate questions
     const result = await generatePassageAndQuestions(extractedText);
-    if (!result) throw new Error(llmError.value || 'LLM returned no result');
+    console.log("LLM result", result);
+    if (!result) throw new Error(llmError.value || "LLM returned no result");
 
     passageText.value = result.passageHtml;
     questions.value = result.questions as any;
@@ -364,7 +365,9 @@ const processPDF = async (file: File): Promise<void> => {
     renderLegacyUI(passageText.value, questions.value);
   } catch (error) {
     console.error("Error processing PDF:", error);
-    alert("Error processing PDF file or LLM generation failed. Please try again.");
+    alert(
+      "Error processing PDF file or LLM generation failed. Please try again."
+    );
   }
 };
 
